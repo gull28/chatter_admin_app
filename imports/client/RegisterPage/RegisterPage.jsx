@@ -26,10 +26,9 @@ export const RegisterPage = ({navigation}) => {
 
       await user.updateProfile({displayName: username});
 
-      await db.collection('users').doc(user.uid).set({
+      await db.collection('appAdmins').doc(user.uid).set({
         username: username,
         phoneNumber: phoneNumber,
-        friends: [],
         email: email,
       });
       navigation.navigate('MenuPage');

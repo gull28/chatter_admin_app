@@ -15,7 +15,7 @@ export const LandingPage = ({navigation}) => {
   return (
     <View style={styles.container}>
       <Animatable.Text animation="bounceIn" style={styles.title}>
-        Chatter
+        Chatter Admin App
       </Animatable.Text>
     </View>
   );

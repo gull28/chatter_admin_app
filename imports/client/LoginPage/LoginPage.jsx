@@ -67,7 +67,7 @@ export const LoginPage = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.logo}>Chatter</Text>
+      <Text style={styles.logo}>Chatter Admin App</Text>
       <View style={styles.inputView}>
         <TextInput
           style={styles.inputText}
