@@ -5,6 +5,7 @@ import {LandingPage} from './imports/client/LandingPage/LandingPage';
 import {LoginPage} from './imports/client/LoginPage/LoginPage';
 import {RegisterPage} from './imports/client/RegisterPage/RegisterPage';
 import Toast from 'react-native-toast-message';
+import {MenuPage} from './imports/MenuPage/MenuPage';
 // npx react-native start
 // npx react-native run-android
 
@@ -32,6 +33,13 @@ const App = () => {
           <Stack.Screen
             name="RegisterPage"
             component={RegisterPage}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="MenuPage"
+            component={MenuPage}
             options={{
               headerShown: false,
             }}

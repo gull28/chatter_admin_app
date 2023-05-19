@@ -20,26 +20,54 @@ const db = firestore();
 const ReportItem = ({report}) => {
   return (
     <View style={styles.reportItem}>
-      <Text style={styles.reportText}>{report.message || report.user}</Text>
+      <Text style={styles.reportText}>
+        {report?.message || report?.comment}
+      </Text>
     </View>
   );
 };
 
 export const MenuPage = ({navigation, route}) => {
-  const [selectedTab, setSelectedTab] = useState(false);
-  const [reports, setReports] = useState([]);
+  const [selectedTab, setSelectedTab] = useState(0);
+  const [userReports, setUserReports] = useState([]);
+  const [messageReports, setMessageReports] = useState([]);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log(selectedTab);
+  }, [selectedTab]);
+
+  useEffect(() => {
+    console.log(messageReports);
+  }, [messageReports]);
+
+  useEffect(() => {
     const fetchReports = async () => {
+      let messageArray = [];
+      let userArray = [];
       try {
-        const reportsRef = db.collection('reports').where('open', '==', true);
+        const reportsRef = db
+          .collection('userReports')
+          .where('open', '==', true);
         const snapshot = await reportsRef.get();
         const fetchedReports = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
         }));
-        setReports(fetchedReports);
+        if (fetchedReports?.message) {
+        }
+        await fetchedReports.map(report => {
+          if (report?.message) {
+            messageArray.push(report);
+          } else {
+            userArray.push(report);
+          }
+        });
+
+        setMessageReports(messageArray);
+        setUserReports(userArray);
+
         setLoading(false);
       } catch (error) {
         console.log('Error fetching reports: ', error);
@@ -49,8 +77,9 @@ export const MenuPage = ({navigation, route}) => {
     fetchReports();
   }, []);
 
-  const messages = reports.filter(report => report.message);
-  const users = reports.filter(report => !report.message);
+  const handleTabChange = index => {
+    setSelectedTab(index);
+  };
 
   return (
     <View style={styles.container}>
@@ -64,47 +93,101 @@ export const MenuPage = ({navigation, route}) => {
       </View>
       <View style={styles.content}>
         <TabView
-          items={items}
-          selectedTab={selectedTab}
-          onSelectTab={setSelectedTab}>
-          <View key="messages" style={styles.tabContent}>
-            {loading ? (
-              <Text>Loading messages...</Text>
-            ) : (
-              <View>
-                {messages.map(report => (
-                  <ReportItem key={report.id} report={report} />
-                ))}
-              </View>
-            )}
+          tabs={items}
+          initialTab={selectedTab}
+          onTabChange={handleTabChange}
+        />
+        {selectedTab === 0 && (
+          <View>
+            {messageReports.map((report, index) => {
+              console.log('LOLOLO');
+              return (
+                <ReportItem key={`${report.id}-${index}`} report={report} />
+              );
+            })}
           </View>
-          <View key="users" style={styles.tabContent}>
-            {loading ? (
-              <Text>Loading users...</Text>
-            ) : (
-              <View>
-                {users.map(report => (
-                  <ReportItem key={report.id} report={report} />
-                ))}
-              </View>
-            )}
+        )}
+        {selectedTab === 1 && (
+          <View>
+            {userReports.map((report, index) => {
+              console.log('LELELE');
+              return (
+                <ReportItem key={`${report.id}-${index}`} report={report} />
+              );
+            })}
           </View>
-        </TabView>
+        )}
       </View>
     </View>
   );
 };
 
-const styles = {
-  // ...existing styles
-
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  searchBarContainer: {
+    flex: 1,
+    marginRight: 10,
+  },
+  profileButton: {
+    backgroundColor: '#2196F3',
+    padding: 10,
+    borderRadius: 5,
+  },
+  profileButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
   content: {
     flex: 1,
     padding: 10,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: '#f1f1f1',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  activeTabText: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    color: '#2196F3',
+    fontWeight: 'bold',
+  },
+  inactiveTabText: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    color: '#666',
   },
   tabContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-};
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  reportList: {
+    width: '100%',
+  },
+  reportItem: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  reportText: {
+    fontSize: 16,
+  },
+});
