@@ -6,6 +6,7 @@ import {LoginPage} from './imports/client/LoginPage/LoginPage';
 import {RegisterPage} from './imports/client/RegisterPage/RegisterPage';
 import Toast from 'react-native-toast-message';
 import {MenuPage} from './imports/MenuPage/MenuPage';
+import {ReportPage} from './imports/client/ReportPage/ReportPage';
 // npx react-native start
 // npx react-native run-android
 
@@ -40,6 +41,13 @@ const App = () => {
           <Stack.Screen
             name="MenuPage"
             component={MenuPage}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="ReportPage"
+            component={ReportPage}
             options={{
               headerShown: false,
             }}

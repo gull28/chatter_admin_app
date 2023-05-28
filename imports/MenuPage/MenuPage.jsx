@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import {TabView} from '../components/TabView';
+import {ReportList} from '../components/ReportList';
 
 const items = [
   {label: 'Message', value: true},
@@ -81,6 +82,10 @@ export const MenuPage = ({navigation, route}) => {
     setSelectedTab(index);
   };
 
+  useEffect(() => {
+    console.log(selectedTab);
+  }, [selectedTab]);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -98,24 +103,10 @@ export const MenuPage = ({navigation, route}) => {
           onTabChange={handleTabChange}
         />
         {selectedTab === 0 && (
-          <View>
-            {messageReports.map((report, index) => {
-              console.log('LOLOLO');
-              return (
-                <ReportItem key={`${report.id}-${index}`} report={report} />
-              );
-            })}
-          </View>
+          <ReportList reports={messageReports} navigation={navigation} />
         )}
         {selectedTab === 1 && (
-          <View>
-            {userReports.map((report, index) => {
-              console.log('LELELE');
-              return (
-                <ReportItem key={`${report.id}-${index}`} report={report} />
-              );
-            })}
-          </View>
+          <ReportList reports={userReports} navigation={navigation} />
         )}
       </View>
     </View>

@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 export const LoginPage = ({navigation}) => {
   const [email, setEmail] = useState('');
@@ -17,16 +18,40 @@ export const LoginPage = ({navigation}) => {
     auth()
       .signInWithEmailAndPassword(email, password)
       .then(userCred => {
-        Toast.show({
-          type: 'success',
-          text1: 'Success',
-          text2: 'Logged in successfully!',
-          visibilityTime: 3000,
-          autoHide: true,
-          topOffset: 30,
-          bottomOffset: 40,
-        });
-        navigation.navigate('MenuPage');
+        const userId = userCred.user.uid;
+
+        // Check if the user ID exists in the "admins" collection
+        firestore()
+          .collection('appAdmins')
+          .doc(userId)
+          .get()
+          .then(doc => {
+            if (doc.exists) {
+              Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: 'Logged in successfully!',
+                visibilityTime: 3000,
+                autoHide: true,
+                topOffset: 30,
+                bottomOffset: 40,
+              });
+              navigation.navigate('MenuPage');
+            } else {
+              Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'You are not authorized to log in as an admin',
+                visibilityTime: 3000,
+                autoHide: true,
+                topOffset: 30,
+                bottomOffset: 40,
+              });
+            }
+          })
+          .catch(error => {
+            console.error(error);
+          });
       })
       .catch(error => {
         if (error.code === 'auth/invalid-email') {
