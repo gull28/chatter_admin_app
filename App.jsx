@@ -1,12 +1,13 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import React from 'react';
+import React, {useEffect} from 'react';
 import {LandingPage} from './imports/client/LandingPage/LandingPage';
 import {LoginPage} from './imports/client/LoginPage/LoginPage';
 import {RegisterPage} from './imports/client/RegisterPage/RegisterPage';
 import Toast from 'react-native-toast-message';
 import {MenuPage} from './imports/MenuPage/MenuPage';
 import {ReportPage} from './imports/client/ReportPage/ReportPage';
+
 // npx react-native start
 // npx react-native run-android
 
