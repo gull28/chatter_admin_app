@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,10 @@ import {
   Modal,
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
-import {TabView} from '../components/TabView';
-import {ReportList} from '../components/ReportList';
+import {firebase} from '@react-native-firebase/auth';
+import {TabView} from '../../components/TabView';
+import {ReportList} from '../../components/ReportList';
+import {useFocusEffect} from '@react-navigation/native';
 
 const items = [
   {label: 'Message', value: true},
@@ -18,65 +20,50 @@ const items = [
 
 const db = firestore();
 
-const ReportItem = ({report}) => {
-  return (
-    <View style={styles.reportItem}>
-      <Text style={styles.reportText}>
-        {report?.message || report?.comment}
-      </Text>
-    </View>
-  );
-};
-
 export const MenuPage = ({navigation, route}) => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [userReports, setUserReports] = useState([]);
   const [messageReports, setMessageReports] = useState([]);
-
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    console.log(selectedTab);
-  }, [selectedTab]);
+  const currentUser = firebase.auth().currentUser;
 
-  useEffect(() => {
-    console.log(messageReports);
-  }, [messageReports]);
-
-  useEffect(() => {
-    const fetchReports = async () => {
-      let messageArray = [];
-      let userArray = [];
-      try {
-        const reportsRef = db
-          .collection('userReports')
-          .where('open', '==', true);
-        const snapshot = await reportsRef.get();
-        const fetchedReports = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        if (fetchedReports?.message) {
-        }
-        await fetchedReports.map(report => {
-          if (report?.message) {
-            messageArray.push(report);
-          } else {
-            userArray.push(report);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchReports = async () => {
+        let messageArray = [];
+        let userArray = [];
+        try {
+          const reportsRef = db
+            .collection('userReports')
+            .where('open', '==', true);
+          const snapshot = await reportsRef.get();
+          const fetchedReports = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          if (fetchedReports?.message) {
           }
-        });
+          await fetchedReports.map(report => {
+            if (report?.message) {
+              messageArray.push(report);
+            } else {
+              userArray.push(report);
+            }
+          });
 
-        setMessageReports(messageArray);
-        setUserReports(userArray);
+          setMessageReports(messageArray);
+          setUserReports(userArray);
 
-        setLoading(false);
-      } catch (error) {
-        console.log('Error fetching reports: ', error);
-      }
-    };
+          setLoading(false);
+        } catch (error) {
+          console.log('Error fetching reports: ', error);
+        }
+      };
 
-    fetchReports();
-  }, []);
+      fetchReports();
+    }, []),
+  );
 
   const handleTabChange = index => {
     setSelectedTab(index);
@@ -86,13 +73,17 @@ export const MenuPage = ({navigation, route}) => {
     console.log(selectedTab);
   }, [selectedTab]);
 
+  const handleProfile = () => {
+    navigation.navigate('ProfilePage', {user: currentUser.uid});
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.searchBarContainer}></View>
         <TouchableOpacity
           style={styles.profileButton}
-          onPress={() => handleProfile(currentUser)}>
+          onPress={() => handleProfile()}>
           <Text style={styles.profileButtonText}>Profile</Text>
         </TouchableOpacity>
       </View>

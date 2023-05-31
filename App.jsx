@@ -5,12 +5,12 @@ import {LandingPage} from './imports/client/LandingPage/LandingPage';
 import {LoginPage} from './imports/client/LoginPage/LoginPage';
 import {RegisterPage} from './imports/client/RegisterPage/RegisterPage';
 import Toast from 'react-native-toast-message';
-import {MenuPage} from './imports/MenuPage/MenuPage';
 import {ReportPage} from './imports/client/ReportPage/ReportPage';
+import {ProfilePage} from './imports/client/ProfilePage/ProfilePage';
+import {MenuPage} from './imports/client/MenuPage/MenuPage';
 
 // npx react-native start
 // npx react-native run-android
-
 const Stack = createNativeStackNavigator();
 
 const App = () => {
@@ -49,6 +49,13 @@ const App = () => {
           <Stack.Screen
             name="ReportPage"
             component={ReportPage}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="ProfilePage"
+            component={ProfilePage}
             options={{
               headerShown: false,
             }}

@@ -1,22 +1,25 @@
-import React from 'react';
-import {View, Text, Button, StyleSheet} from 'react-native';
-import firebase from '@react-native-firebase/app';
+import React, {useState} from 'react';
+import {View, Text, Button, StyleSheet, ActivityIndicator} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
-import auth from '@react-native-firebase/auth';
-import admin from 'firebase-admin';
 
 const db = firestore();
 
 export const ReportPage = ({navigation, route}) => {
   const {reports} = route.params;
   const {id, userId, reportedUsername} = reports;
+  const [loading, setLoading] = useState(false);
 
   const handleBanUser = async userId => {
+    setLoading(true);
+
     // Step 1: Delete user from Firebase Authentication
     try {
-      await admin.auth().deleteUser(userId);
+      await db
+        .collection('bannedUsers')
+        .doc(userId)
+        .set({banned: true, username: reportedUsername});
     } catch (error) {
-      console.error('Error deleting user from Firebase Authentication:', error);
+      console.error('Error adding user to bannedUsers collection:', error);
       // Handle error
       return;
     }
@@ -122,6 +125,7 @@ export const ReportPage = ({navigation, route}) => {
       usersSnapshot.forEach(userDoc => {
         const userData = userDoc.data();
         const {friends} = userData;
+        console.log(friends);
 
         if (friends.includes(userId)) {
           const updatedFriends = friends.filter(friend => friend !== userId);
@@ -157,6 +161,16 @@ export const ReportPage = ({navigation, route}) => {
       return;
     }
 
+    try {
+      const reportRef = db.collection('userReports').doc(id);
+      await reportRef.update({open: false});
+    } catch (error) {
+      console.error('Error updating report status to closed:', error);
+      // Handle error
+      return;
+    }
+    navigation.navigate('MenuPage');
+    setLoading(true);
     // User ban operations completed successfully
     console.log('User banned successfully');
   };
@@ -176,6 +190,11 @@ export const ReportPage = ({navigation, route}) => {
         <Button title="Ban User" onPress={() => handleBanUser(id)} />
         <Button title="Not Ban User" onPress={handleNotBanUser} />
       </View>
+      {loading && (
+        <View style={styles.spinnerContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      )}
     </View>
   );
 };
@@ -204,5 +223,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginTop: 32,
+  },
+  spinnerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
