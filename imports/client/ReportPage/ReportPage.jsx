@@ -6,9 +6,9 @@ const db = firestore();
 
 export const ReportPage = ({navigation, route}) => {
   const {reports} = route.params;
-  const {id, userId, reportedUsername} = reports;
+  const {id, reportedUser, reportedUsername, email} = reports;
   const [loading, setLoading] = useState(false);
-
+  console.log('id', id);
   const handleBanUser = async userId => {
     setLoading(true);
 
@@ -17,7 +17,7 @@ export const ReportPage = ({navigation, route}) => {
       await db
         .collection('bannedUsers')
         .doc(userId)
-        .set({banned: true, username: reportedUsername});
+        .set({banned: true, username: reportedUsername, email: email});
     } catch (error) {
       console.error('Error adding user to bannedUsers collection:', error);
       // Handle error
@@ -181,13 +181,13 @@ export const ReportPage = ({navigation, route}) => {
     <View style={styles.container}>
       <Text style={styles.title}>Report Details</Text>
       <Text style={styles.label}>ID:</Text>
-      <Text style={styles.value}>{id}</Text>
+      <Text style={styles.value}>{reportedUser}</Text>
       <Text style={styles.label}>Content:</Text>
       <Text style={styles.value}>{reports?.comment || reports?.message}</Text>
       <Text style={styles.label}>User ID:</Text>
       <Text style={styles.value}>{reportedUsername}</Text>
       <View style={styles.buttonContainer}>
-        <Button title="Ban User" onPress={() => handleBanUser(id)} />
+        <Button title="Ban User" onPress={() => handleBanUser(reportedUser)} />
         <Button title="Not Ban User" onPress={handleNotBanUser} />
       </View>
       {loading && (
