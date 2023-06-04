@@ -26,7 +26,7 @@ export const ProfilePage = ({navigation, route}) => {
 
   const userData = async () => {
     try {
-      const userDoc = await db.collection('users').doc(user).get();
+      const userDoc = await db.collection('appAdmins').doc(user).get();
       if (userDoc.exists) {
         return userDoc.data();
       } else {
