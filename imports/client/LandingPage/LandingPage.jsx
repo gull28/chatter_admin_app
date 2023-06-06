@@ -1,12 +1,22 @@
 import React, {useEffect} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import * as Animatable from 'react-native-animatable';
+import auth from '@react-native-firebase/auth';
 
 export const LandingPage = ({navigation}) => {
   useEffect(() => {
-    // Navigate to a different page after the animation ends
     const timeout = setTimeout(() => {
-      navigation.navigate('LoginPage');
+      console.log('hello :D');
+      const unsubscribe = auth().onAuthStateChanged(user => {
+        if (user) {
+          console.log('user', user);
+          navigation.navigate('MenuPage');
+        } else {
+          console.log('null', user);
+          navigation.navigate('LoginPage');
+        }
+      });
+      return () => unsubscribe();
     }, 2000);
 
     return () => clearTimeout(timeout);
@@ -15,7 +25,7 @@ export const LandingPage = ({navigation}) => {
   return (
     <View style={styles.container}>
       <Animatable.Text animation="bounceIn" style={styles.title}>
-        Chatter Admin App
+        Chatter Admin
       </Animatable.Text>
     </View>
   );

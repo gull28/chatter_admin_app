@@ -152,6 +152,7 @@ export const ProfilePage = ({navigation, route}) => {
           value={username}
           onChangeText={username => handleUsernameChange(username)}
           placeholder="Enter username"
+          placeholderTextColor={'black'}
           style={styles.input}
         />
       </View>
@@ -161,6 +162,7 @@ export const ProfilePage = ({navigation, route}) => {
           value={oldPassword}
           onChangeText={oldPassword => handleOldPasswordChange(oldPassword)}
           placeholder="Enter old password"
+          placeholderTextColor={'black'}
           secureTextEntry={true}
           style={styles.input}
         />
