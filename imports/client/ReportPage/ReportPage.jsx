@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {View, Text, Button, StyleSheet, ActivityIndicator} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
+import {errorToast} from '../../helpers/helpers';
 
 const db = firestore();
 
@@ -12,23 +13,20 @@ export const ReportPage = ({navigation, route}) => {
   const handleBanUser = async userId => {
     setLoading(true);
 
-    // Step 1: Delete user from Firebase Authentication
     try {
+      const batch = db.batch();
+
+      // Step 1: Delete user from Firebase Authentication
       await db
         .collection('bannedUsers')
         .doc(userId)
-        .set({banned: true, username: reportedUsername, email: email});
-    } catch (error) {
-      console.error('Error adding user to bannedUsers collection:', error);
-      // Handle error
-      return;
-    }
+        .set(
+          {banned: true, username: reportedUsername, email: email},
+          {merge: true},
+        );
 
-    // Step 2: Remove user from all groups
-    try {
+      // Step 2: Remove user from all groups
       const groupsSnapshot = await db.collection('chatGroups').get();
-      const batch = db.batch();
-
       groupsSnapshot.forEach(groupDoc => {
         const groupData = groupDoc.data();
         const {groupOwner, participants, admins} = groupData;
@@ -53,18 +51,8 @@ export const ReportPage = ({navigation, route}) => {
         }
       });
 
-      await batch.commit();
-    } catch (error) {
-      console.error('Error removing user from groups:', error);
-      // Handle error
-      return;
-    }
-
-    // Step 3: Remove user's messages from chats if not the owner
-    try {
+      // Step 3: Remove user's messages from chats if not the owner
       const chatsSnapshot = await db.collection('chatGroups').get();
-      const batch = db.batch();
-
       chatsSnapshot.forEach(chatDoc => {
         const chatData = chatDoc.data();
         const {groupOwner} = chatData;
@@ -85,18 +73,8 @@ export const ReportPage = ({navigation, route}) => {
         }
       });
 
-      await batch.commit();
-    } catch (error) {
-      console.error('Error removing user messages from chats:', error);
-      // Handle error
-      return;
-    }
-
-    // Step 4: Remove user's ID from admins array in group chats
-    try {
+      // Step 4: Remove user's ID from admins array in group chats
       const groupChatsSnapshot = await db.collection('chatGroups').get();
-      const batch = db.batch();
-
       groupChatsSnapshot.forEach(groupChatDoc => {
         const groupChatData = groupChatDoc.data();
         const {admins} = groupChatData;
@@ -107,44 +85,21 @@ export const ReportPage = ({navigation, route}) => {
         }
       });
 
-      await batch.commit();
-    } catch (error) {
-      console.error(
-        'Error removing user ID from group chat admins array:',
-        error,
-      );
-      // Handle error
-      return;
-    }
-
-    // Step 5: Remove user from other users' friends lists
-    try {
-      const usersSnapshot = await db.collection('users').get();
-      const batch = db.batch();
-
+      // Step 5: Remove user from other users' friends lists
+      const usersSnapshot = await db
+        .collection('users')
+        .where('friends', 'array-contains', userId)
+        .get();
       usersSnapshot.forEach(userDoc => {
         const userData = userDoc.data();
         const {friends} = userData;
-        console.log(friends);
 
-        if (friends.includes(userId)) {
-          const updatedFriends = friends.filter(friend => friend !== userId);
-          batch.update(userDoc.ref, {friends: updatedFriends});
-        }
+        const updatedFriends = friends.filter(friend => friend !== userId);
+        batch.update(userDoc.ref, {friends: updatedFriends});
       });
 
-      await batch.commit();
-    } catch (error) {
-      console.error('Error removing user from friends lists:', error);
-      // Handle error
-      return;
-    }
-
-    // Step 6: Remove user from conversations
-    try {
+      // Step 6: Remove user from conversations
       const conversationsSnapshot = await db.collection('conversations').get();
-      const batch = db.batch();
-
       conversationsSnapshot.forEach(conversationDoc => {
         const conversationData = conversationDoc.data();
         const {participants} = conversationData;
@@ -154,41 +109,61 @@ export const ReportPage = ({navigation, route}) => {
         }
       });
 
+      // Step 7: Update report status to closed
+      const reportRef = db.collection('userReports').doc(id);
+      batch.update(reportRef, {open: false});
+
       await batch.commit();
+
+      navigation.navigate('MenuPage');
+      setLoading(true);
+      // User ban operations completed successfully
+      errorToast('User banned successfully!');
     } catch (error) {
-      console.error('Error removing user from conversations:', error);
+      console.error('Error performing user ban operations:', error);
       // Handle error
       return;
     }
+  };
 
+  const handleNotBanUser = async () => {
     try {
       const reportRef = db.collection('userReports').doc(id);
       await reportRef.update({open: false});
+      navigation.navigate('MenuPage');
     } catch (error) {
       console.error('Error updating report status to closed:', error);
       // Handle error
       return;
     }
-    navigation.navigate('MenuPage');
-    setLoading(true);
-    // User ban operations completed successfully
-    console.log('User banned successfully');
   };
-
-  const handleNotBanUser = () => {};
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Report Details</Text>
-      <Text style={styles.label}>ID:</Text>
-      <Text style={styles.value}>{reportedUser}</Text>
-      <Text style={styles.label}>Content:</Text>
-      <Text style={styles.value}>{reports?.comment || reports?.message}</Text>
-      <Text style={styles.label}>User ID:</Text>
-      <Text style={styles.value}>{reportedUsername}</Text>
+      <View style={styles.section}>
+        <Text style={styles.label}>ID:</Text>
+        <Text style={styles.value}>{reportedUser}</Text>
+      </View>
+      <View style={styles.section}>
+        <Text style={styles.label}>Content:</Text>
+        <Text style={styles.value}>{reports?.comment || reports?.message}</Text>
+      </View>
+      <View style={styles.section}>
+        <Text style={styles.label}>User ID:</Text>
+        <Text style={styles.value}>{reportedUsername}</Text>
+      </View>
       <View style={styles.buttonContainer}>
-        <Button title="Ban User" onPress={() => handleBanUser(reportedUser)} />
-        <Button title="Not Ban User" onPress={handleNotBanUser} />
+        <Button
+          title="Ban User"
+          onPress={() => handleBanUser(reportedUser)}
+          style={styles.button}
+        />
+        <Button
+          title="Not Ban User"
+          onPress={handleNotBanUser}
+          style={styles.button}
+        />
       </View>
       {loading && (
         <View style={styles.spinnerContainer}>
@@ -203,26 +178,38 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
+    color: '#333333',
+  },
+  section: {
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#dddddd',
+    borderRadius: 8,
+    padding: 16,
   },
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginTop: 16,
+    color: '#333333',
   },
   value: {
     fontSize: 16,
     marginTop: 4,
+    color: '#666666',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginTop: 32,
+  },
+  button: {
+    borderRadius: 8,
   },
   spinnerContainer: {
     flex: 1,

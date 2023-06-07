@@ -80,7 +80,9 @@ export const MenuPage = ({navigation, route}) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.searchBarContainer}></View>
+        <View style={styles.searchBarContainer}>
+          <Text>Report bar</Text>
+        </View>
         <TouchableOpacity
           style={styles.profileButton}
           onPress={() => handleProfile()}>
