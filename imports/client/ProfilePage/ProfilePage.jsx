@@ -11,6 +11,7 @@ import {firebase} from '@react-native-firebase/auth';
 import Toast from 'react-native-toast-message';
 import auth from '@react-native-firebase/auth';
 import {BackButton} from '../../components/BackArrow';
+import {errorToast, successToast} from '../../helpers/helpers';
 
 const db = firestore();
 
@@ -18,7 +19,6 @@ export const ProfilePage = ({navigation, route}) => {
   const {user} = route.params;
 
   const [username, setUsername] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
 
   const [newPassword, setNewPassword] = useState('');
@@ -26,7 +26,6 @@ export const ProfilePage = ({navigation, route}) => {
 
   const userData = async () => {
     try {
-      console.log('userId', user);
       const userDoc = await db.collection('appAdmins').doc(user).get();
       if (userDoc.exists) {
         return userDoc.data();
@@ -37,11 +36,10 @@ export const ProfilePage = ({navigation, route}) => {
 
   useEffect(() => {
     const getUserData = async () => {
-      const {username, phoneNumber, email} = await userData();
+      const {username, email} = await userData();
 
       setEmail(email);
       setUsername(username);
-      setPhoneNumber(phoneNumber);
     };
 
     getUserData();
@@ -51,7 +49,9 @@ export const ProfilePage = ({navigation, route}) => {
     try {
       await auth().signOut();
       navigation.navigate('LoginPage');
-    } catch (error) {}
+    } catch (error) {
+      errorToast('Failed to log out!');
+    }
   };
 
   const handleUsernameChange = username => {
@@ -66,12 +66,7 @@ export const ProfilePage = ({navigation, route}) => {
     setNewPassword(newPassword);
   };
 
-  const saveChanges = async (
-    newPassword,
-    currentPassword,
-    username,
-    phoneNumber,
-  ) => {
+  const saveChanges = async (newPassword, currentPassword, username) => {
     if (
       newPassword.trim() !== '' &&
       currentPassword.trim() !== '' &&
@@ -87,53 +82,32 @@ export const ProfilePage = ({navigation, route}) => {
 
         await user.updatePassword(newPassword);
 
-        Toast.show({
-          type: 'success',
-          text1: 'Success',
-          text2: 'Password successfully updated!',
-          visibilityTime: 4000,
-          autoHide: true,
-          topOffset: 30,
-          bottomOffset: 40,
-        });
+        successToast('Password successfully updated!');
 
         navigation.navigate('MenuPage');
       } catch (error) {
-        Toast.show({
-          type: 'error',
-          text1: 'Error',
-          text2: 'Password error!',
-          visibilityTime: 4000,
-          autoHide: true,
-          topOffset: 30,
-          bottomOffset: 40,
-        });
+        errorToast('Password error!');
       }
     } else {
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'Password must not be empty or the same as your last password!',
-        visibilityTime: 4000,
-        autoHide: true,
-        topOffset: 30,
-        bottomOffset: 40,
-      });
+      errorToast(
+        'Password must not be empty or the same as your last password!',
+      );
     }
 
-    if (!username || !phoneNumber) {
+    if (!username) {
       return;
     }
 
-    if (!username || (!phoneNumber && username === userData.username)) {
+    if (!username || username === userData.username) {
       return;
     } else {
       try {
-        await db.collection('users').doc(user).update({
+        await db.collection('appAdmins').doc(user).update({
           username: username,
-          phoneNumber: phoneNumber,
         });
-      } catch (error) {}
+      } catch (error) {
+        errorToast(error.message);
+      }
     }
   };
 
@@ -143,45 +117,44 @@ export const ProfilePage = ({navigation, route}) => {
         <BackButton onPress={() => navigation.goBack()} color="#2196F3" />
         <Text style={styles.title}>Profile Page</Text>
       </View>
-      <View style={styles.infoContainer}>
+      <View style={{...styles.infoContainer, backgroundColor: 'white'}}>
         <Text style={styles.label}>Email:</Text>
         <Text style={styles.infoText}>{email}</Text>
       </View>
-      <View style={styles.infoContainer}>
+      <View style={{...styles.infoContainer, borderWidth: 0, padding: 0}}>
         <Text style={styles.label}>Username:</Text>
         <TextInput
           value={username}
           onChangeText={username => handleUsernameChange(username)}
           placeholder="Enter username"
-          placeholderTextColor={'black'}
+          placeholderTextColor="black"
           style={styles.input}
         />
       </View>
-      <View style={styles.infoContainer}>
+      <View style={{...styles.infoContainer, borderWidth: 0, padding: 0}}>
         <Text style={styles.label}>Old password:</Text>
         <TextInput
           value={oldPassword}
           onChangeText={oldPassword => handleOldPasswordChange(oldPassword)}
           placeholder="Enter old password"
-          placeholderTextColor={'black'}
+          placeholderTextColor="black"
           secureTextEntry={true}
           style={styles.input}
         />
       </View>
-      <View style={styles.infoContainer}>
+      <View style={{...styles.infoContainer, borderWidth: 0, padding: 0}}>
         <Text style={styles.label}>New password:</Text>
         <TextInput
           value={newPassword}
           onChangeText={newPassword => handleNewPasswordChange(newPassword)}
           placeholder="Enter new password"
+          placeholderTextColor="black"
           secureTextEntry={true}
           style={styles.input}
         />
       </View>
       <TouchableOpacity
-        onPress={() =>
-          saveChanges(newPassword, oldPassword, username, phoneNumber)
-        }
+        onPress={() => saveChanges(newPassword, oldPassword, username)}
         style={styles.saveButton}>
         <Text style={styles.buttonText}>Save Changes</Text>
       </TouchableOpacity>
@@ -202,14 +175,16 @@ export const ProfilePage = ({navigation, route}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     paddingHorizontal: 20,
     paddingVertical: 10,
+    backgroundColor: '#f2f2f2',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
+    color: '#000',
+    backgroundColor: '#f2f2f2',
   },
   backButton: {
     backgroundColor: '#2196F3',
@@ -232,14 +207,20 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
   },
   label: {
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 5,
+    color: '#000',
   },
   infoText: {
     fontSize: 16,
+    color: '#000',
   },
   input: {
     fontSize: 16,
@@ -248,6 +229,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
+    color: '#000',
+    backgroundColor: 'white',
   },
   saveButton: {
     backgroundColor: '#2196F3',

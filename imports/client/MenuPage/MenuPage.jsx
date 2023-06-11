@@ -9,9 +9,9 @@ import {
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import {firebase} from '@react-native-firebase/auth';
-import {TabView} from '../../components/TabView';
 import {ReportList} from '../../components/ReportList';
 import {useFocusEffect} from '@react-navigation/native';
+import {TabView} from '../../components/TabView';
 
 const items = [
   {label: 'Message', value: true},
@@ -28,43 +28,34 @@ export const MenuPage = ({navigation, route}) => {
 
   const currentUser = firebase.auth().currentUser;
 
-  useFocusEffect(
-    useCallback(() => {
-      const fetchReports = async () => {
+  useEffect(() => {
+    const unsubscribe = db
+      .collection('userReports')
+      .where('open', '==', true)
+      .onSnapshot(snapshot => {
         let messageArray = [];
         let userArray = [];
-        try {
-          const reportsRef = db
-            .collection('userReports')
-            .where('open', '==', true);
-          const snapshot = await reportsRef.get();
-          const fetchedReports = snapshot.docs.map(doc => ({
+        snapshot.forEach(doc => {
+          const report = {
             id: doc.id,
             ...doc.data(),
-          }));
-          if (fetchedReports?.message) {
+          };
+          if (report.message) {
+            messageArray.push(report);
+          } else {
+            userArray.push(report);
           }
-          await fetchedReports.map(report => {
-            if (report?.message) {
-              messageArray.push(report);
-            } else {
-              userArray.push(report);
-            }
-          });
+        });
 
-          setMessageReports(messageArray);
-          setUserReports(userArray);
+        setMessageReports(messageArray);
+        setUserReports(userArray);
+        setLoading(false);
+      });
 
-          setLoading(false);
-        } catch (error) {
-          console.log('Error fetching reports: ', error);
-        }
-      };
-
-      fetchReports();
-    }, []),
-  );
-
+    return () => {
+      unsubscribe(); // Unsubscribe from the Firestore listener when the component unmounts
+    };
+  }, []);
   const handleTabChange = index => {
     setSelectedTab(index);
   };
@@ -81,7 +72,7 @@ export const MenuPage = ({navigation, route}) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.searchBarContainer}>
-          <Text>Report bar</Text>
+          <Text style={styles.title}>Report page</Text>
         </View>
         <TouchableOpacity
           style={styles.profileButton}
@@ -109,7 +100,13 @@ export const MenuPage = ({navigation, route}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f2f2f2',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    justifyContent: 'flex-start',
+    color: '#2196F3',
   },
   header: {
     flexDirection: 'row',
@@ -119,6 +116,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    backgroundColor: '#f2f2f2',
   },
   searchBarContainer: {
     flex: 1,
@@ -135,13 +133,13 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 10,
   },
   tabBar: {
     flexDirection: 'row',
     backgroundColor: '#f1f1f1',
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+    margin: 10,
   },
   activeTabText: {
     paddingHorizontal: 20,

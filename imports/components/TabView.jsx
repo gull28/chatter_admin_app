@@ -43,11 +43,11 @@ export const TabView = ({tabs, initialTab, onTabChange}) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: '#F5FCFF',
-    borderRadius: 5,
+    backgroundColor: '#f2f2f2',
     overflow: 'hidden',
     paddingVertical: 5,
     paddingHorizontal: 10,
+    marginTop: 7,
   },
   tab: {
     flex: 1,

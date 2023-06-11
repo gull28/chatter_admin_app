@@ -178,13 +178,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f2f2f2',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: '#333333',
+    color: '#2196F3',
   },
   section: {
     marginBottom: 16,
@@ -192,16 +192,17 @@ const styles = StyleSheet.create({
     borderColor: '#dddddd',
     borderRadius: 8,
     padding: 16,
+    backgroundColor: 'white',
   },
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333333',
+    color: '#2196F3',
   },
   value: {
     fontSize: 16,
     marginTop: 4,
-    color: '#666666',
+    color: '#333333',
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
     marginTop: 32,
   },
   button: {
-    borderRadius: 8,
+    borderRadius: 20,
   },
   spinnerContainer: {
     flex: 1,
