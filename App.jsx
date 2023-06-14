@@ -8,6 +8,7 @@ import Toast from 'react-native-toast-message';
 import {ReportPage} from './imports/client/ReportPage/ReportPage';
 import {ProfilePage} from './imports/client/ProfilePage/ProfilePage';
 import {MenuPage} from './imports/client/MenuPage/MenuPage';
+import {DeleteAccountPage} from './imports/client/DeleteAccountPage/DeleteAccountPage';
 
 // npx react-native start
 // npx react-native run-android
@@ -56,6 +57,13 @@ const App = () => {
           <Stack.Screen
             name="ProfilePage"
             component={ProfilePage}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="ProfilePage"
+            component={DeleteAccountPage}
             options={{
               headerShown: false,
             }}
