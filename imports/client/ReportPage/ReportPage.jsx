@@ -9,13 +9,11 @@ export const ReportPage = ({navigation, route}) => {
   const {reports} = route.params;
   const {id, reportedUser, reportedUsername, email} = reports;
   const [loading, setLoading] = useState(false);
-  console.log('id', id);
   const handleBanUser = async userId => {
     setLoading(true);
 
     try {
       const batch = db.batch();
-
       // Step 1: Delete user from Firebase Authentication
       await db
         .collection('bannedUsers')

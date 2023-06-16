@@ -49,6 +49,16 @@ export const RegisterPage = ({navigation}) => {
         return;
       }
 
+      const usernameSnapshot = await db
+        .collection('appAdmins')
+        .where('username', '==', username)
+        .get();
+
+      if (!usernameSnapshot.empty) {
+        errorToast('Username already taken!');
+        return;
+      }
+
       const {user} = await auth().createUserWithEmailAndPassword(
         email,
         password,

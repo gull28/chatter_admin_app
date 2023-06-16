@@ -62,7 +62,7 @@ const App = () => {
             }}
           />
           <Stack.Screen
-            name="ProfilePage"
+            name="DeleteAccountPage"
             component={DeleteAccountPage}
             options={{
               headerShown: false,
