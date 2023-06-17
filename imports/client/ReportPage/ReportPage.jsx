@@ -148,7 +148,7 @@ export const ReportPage = ({navigation, route}) => {
         <Text style={styles.value}>{reports?.comment || reports?.message}</Text>
       </View>
       <View style={styles.section}>
-        <Text style={styles.label}>User ID:</Text>
+        <Text style={styles.label}>Username:</Text>
         <Text style={styles.value}>{reportedUsername}</Text>
       </View>
       <View style={styles.buttonContainer}>

@@ -1,4 +1,4 @@
-package com.chatter;
+package com.chatter_admin;
 
 import android.os.Bundle;
 import com.facebook.react.ReactActivity;
@@ -14,7 +14,7 @@ public class MainActivity extends ReactActivity {
    */
   @Override
   protected String getMainComponentName() {
-    return "chatter";
+    return "chatter_admin";
   }
 
   @Override

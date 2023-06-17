@@ -1,4 +1,4 @@
-package com.chatter;
+package com.chatter_admin;
 
 import android.app.Application;
 import com.facebook.react.PackageList;

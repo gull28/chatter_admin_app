@@ -94,9 +94,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.chatter"
+    namespace "com.chatter_admin"
     defaultConfig {
-        applicationId "com.chatter"
+        applicationId "com.chatter_admin"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
