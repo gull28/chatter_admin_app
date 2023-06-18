@@ -24,7 +24,7 @@ export const DeleteAccountPage = ({navigation}) => {
       db.collection('users').doc(userId).delete();
 
       // User ban operations completed successfully
-      errorToast('User banned successfully!');
+      successToast('User banned successfully!');
     } catch (error) {
       console.error('Error performing user ban operations:', error);
       // Handle error

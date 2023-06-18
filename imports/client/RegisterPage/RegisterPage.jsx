@@ -74,7 +74,7 @@ export const RegisterPage = ({navigation}) => {
 
       successToast(`Successfully registered user ${username}`);
     } catch (error) {
-      errorToast(error.message);
+      errorToast('Register error!');
     }
   };
 

@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {View, Text, Button, StyleSheet, ActivityIndicator} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
-import {errorToast} from '../../helpers/helpers';
+import {errorToast, successToast} from '../../helpers/helpers';
 
 const db = firestore();
 
@@ -116,7 +116,7 @@ export const ReportPage = ({navigation, route}) => {
       navigation.navigate('MenuPage');
       setLoading(true);
       // User ban operations completed successfully
-      errorToast('User banned successfully!');
+      successToast('User banned successfully!');
     } catch (error) {
       console.error('Error performing user ban operations:', error);
       // Handle error
